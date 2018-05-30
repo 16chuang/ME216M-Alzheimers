@@ -20,7 +20,7 @@
 #define IO_USERNAME "claire_h"
 #define IO_KEY "e5209e5b9fe4409eb29e6fb17d3ef8a8"
 AdafruitIO_WiFi io(IO_USERNAME, IO_KEY, WIFI_SSID, WIFI_PASS);
-AdafruitIO_Feed *tempFeed = io.feed("me216m-synapse.tile-match");
+AdafruitIO_Feed *feed = io.feed("me216m-synapse.events");
 
 
 //      Multiplexer pins     //
@@ -47,19 +47,20 @@ MatchState matchState;
 //      Tile voltage readings (IDs)     //
 #define NO_TILE 0
 #define EMPTY   8
-#define TILE_1  80
+#define TILE_1  94
 #define TILE_2  874
-#define TILE_3  377
-#define TILE_4  476
-#define TILE_5  212
+#define TILE_3  386
+#define TILE_4  485
+#define TILE_5  224
 
-#define VOLTAGE_DEADBAND 10 // Two-sided deadband
+#define VOLTAGE_DEADBAND 20 // Two-sided deadband
 
 int tile1 = NO_TILE;
 int tile2 = NO_TILE;
 
 int gameId = 0;
 int score = 0;
+String prefix = "";
 
 //      Stored game state     //
 #define NUM_TILES 10
@@ -81,6 +82,9 @@ void readBoardState(int board[NUM_TILES]);
 void setup() {
   Serial.begin(115200);
   EEPROM.begin(512);
+
+//  EEPROM.write(0,0);
+  gameId = EEPROM.read(0);
   
   pinMode(MUX_S0, OUTPUT);
   pinMode(MUX_S1, OUTPUT);
@@ -115,12 +119,16 @@ void loop() {
   
   // When select button is pressed, start game (will be replaced by more complex display logic later)
   if (setupState == STATE_WAIT_FOR_START && digitalRead(SELECT_BUTTON) == HIGH) {
+    gameId++;
+    prefix = "gameId: "; // TODO: REPLACE WITH LESS JANK
+    prefix += gameId;
     reportGameStart();
 
     // Prepare for game
     readBoardState(originalBoard);
     copyBoard(originalBoard, prevBoard);
-    gameId++; // TODO: make game ID unique across device resets
+    EEPROM.write(0, gameId); 
+    EEPROM.commit();
 
     // Play game
     while (playGame());
@@ -236,27 +244,53 @@ int readMuxChannel(int chan) {
 
 
 void reportGameStart() {
-  Serial.println("reporting: GAME STARTED");
+  Serial.print("reporting: GAME STARTED ");
+  Serial.println(gameId);
+  String str = prefix;
+  str += ", event: game start";
+  feed->save(str);
 }
 
 void reportGameEnd(int score) {
   Serial.println("reporting: GAME ENDED");
+  String str = prefix;
+  str += ", event: game end, score: ";
+  str += score;
+  feed->save(str);
 }
 
 void reportTileFlipUp(int tileId) {
   Serial.println("reporting: TILE FLIPPED UP");
+  String str = prefix;
+  str += ", event: tile flipped up, tileId: ";
+  str += tileId;
+  feed->save(str);
 }
 
 void reportTileFlipDown(int tileId) {
   Serial.println("reporting: TILE FLIPPED DOWN");
+  String str = prefix;
+  str += ", event: tile flipped down, tileId: ";
+  str += tileId;
+  feed->save(str);
 }
 
 void reportTileMatch(int tileId, int score) {
   Serial.println("reporting: TILE MATCH");
   Serial.print("Match found! Score: "); Serial.println(score);
+  String str = prefix;
+  str += ", event: tile match, tileId: ";
+  str += tileId;
+  feed->save(str);
 }
 
 void reportTileMismatch(int tile1, int tile2, int score) {
   Serial.println("reporting: TILE MISMATCH");
   Serial.print("Not a match. Score: "); Serial.println(score);
+  String str = prefix;
+  str += ", event: tile mismatch, tileId1: ";
+  str += tile1;
+  str += ", tileId2: ";
+  str += tile2;
+  feed->save(str);
 }

@@ -5,14 +5,14 @@
 
 #define ANALOG_IN A0
 
-#define VOLTAGE_DEADBAND 10
+#define VOLTAGE_DEADBAND 20
 
 #define NO_TILE 8
-#define TILE_1  80
+#define TILE_1  94
 #define TILE_2  874
-#define TILE_3  377
-#define TILE_4  476
-#define TILE_5  212
+#define TILE_3  386
+#define TILE_4  485
+#define TILE_5  224
 
 void setup() {
   Serial.begin(115200);
@@ -28,7 +28,7 @@ void setup() {
 void loop() {
   for (int i = 0; i < 10; i++) {
     int raw = readMuxChannel(i);
-//    Serial.print(raw); Serial.print(": "); 
+    Serial.print(raw); Serial.print(": "); 
     Serial.print(tileId(raw)); 
     Serial.print('\t');
     delay(100);
@@ -37,7 +37,7 @@ void loop() {
 }
 
 int tileId(int reading) {
-  if (abs(reading - 0) < VOLTAGE_DEADBAND) return 0;
+  if (abs(reading - NO_TILE) < VOLTAGE_DEADBAND) return 0;
   if (abs(reading - TILE_1) < VOLTAGE_DEADBAND) return 1;
   if (abs(reading - TILE_2) < VOLTAGE_DEADBAND) return 2;
   if (abs(reading - TILE_3) < VOLTAGE_DEADBAND) return 3;
