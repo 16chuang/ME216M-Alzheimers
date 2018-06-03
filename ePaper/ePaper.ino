@@ -9,6 +9,8 @@ Epd epaper;
 #define COLORED     0
 #define UNCOLORED   1
 
+int score = 0;
+
 void setup() {
   Serial.begin(115200);
 
@@ -23,41 +25,49 @@ void setup() {
   epaper.ClearFrameMemory(0xFF);
   epaper.DisplayFrame();
 
-//  // Height and width need to be multiples of 8?
-//  paint.SetWidth(32); // vertical height
-//  paint.SetHeight(504); // horizontal width (max 504?)
-//  paint.SetRotate(ROTATE_0);
-//
-//  paint.Clear(COLORED);
-//  // Position within frame memory block (horizontal, vertical)
-//  paint.DrawStringAt(0, 8, "START 2 PLAYER GAME", &Font16, UNCOLORED);
-//  // Position on screen? (vertical, horizontal) coordinate of bottom left corner
-//  epaper.SetFrameMemory(paint.GetImage(), 40, 0, paint.GetWidth(), paint.GetHeight());
-//
-//  paint.Clear(COLORED);
-//  // Position within frame memory block (horizontal, vertical)
-//  paint.DrawStringAt(0, 8, "START 1 PLAYER GAME", &Font20, UNCOLORED);
-//  // Position on screen? (vertical increasing upward, horizontal)
-//  epaper.SetFrameMemory(paint.GetImage(), 8, 0, paint.GetWidth(), 288);
+  updateScoreDisplay();
+  delay(2000);
+}
 
-  paint.SetRotate(ROTATE_90);
+void loop() {
+  score++;
+
+  Serial.print("Number of matches found: ");
+  Serial.println(score);
+
+  updateScoreDisplay();
+  
+  delay(2000);
+}
+
+void updateScoreDisplay() {
+  paint.SetRotate(ROTATE_270);
   paint.SetWidth(32);
-  paint.SetHeight(EPD_HEIGHT);
+  paint.SetHeight(256); // width
+  
+  paint.Clear(UNCOLORED);
+//  // Position within frame memory block (horizontal, vertical)
+  paint.DrawStringAt(0, 8, "NUMBER OF         ", &Font20, COLORED);
+//  // Position on screen? (vertical, horizontal) coordinate of bottom left corner
+//    // horizontal increasing goes more left
+//    // vertical increasing goes down
+  epaper.SetFrameMemory(paint.GetImage(), 32, 24, paint.GetWidth(), paint.GetHeight());
 
-//  paint.Clear(COLORED);
-//  paint.DrawStringAt(0, 8, "START 1 PLAYER GAME", &Font16, UNCOLORED);
-//  epaper.SetFrameMemory(paint.GetImage(), 50, 0, paint.GetWidth(), paint.GetHeight());
+  paint.Clear(UNCOLORED);
+  paint.DrawStringAt(0, 8, "MATCHES FOUND         ", &Font20, COLORED);
+  epaper.SetFrameMemory(paint.GetImage(), 56, 24, paint.GetWidth(), paint.GetHeight());
 
-  paint.Clear(COLORED);
-  // Position within frame memory block (horizontal, vertical)
-  paint.DrawStringAt(0, 8, "START 2 PLAYER GAME", &Font16, UNCOLORED);
-  // Position on screen? (vertical, horizontal) coordinate of bottom left corner
-  epaper.SetFrameMemory(paint.GetImage(), 10, 0, paint.GetWidth(), paint.GetHeight());
+  paint.SetRotate(ROTATE_270);
+  paint.SetWidth(32);
+  paint.SetHeight(32);
+
+  paint.Clear(UNCOLORED);
+  char str[] = {'0', '\0'};
+  str[0] = score + '0';
+  Serial.println(str);
+  paint.DrawStringAt(0, 8, str, &Font24, COLORED);
+  epaper.SetFrameMemory(paint.GetImage(), 40, 16, paint.GetWidth(), paint.GetHeight());
 
   epaper.DisplayFrame();
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-
-}
