@@ -1,6 +1,30 @@
-#include <SPI.h>
+//#include <SPI.h>
 #include <epd2in9.h>
 #include <epdpaint.h>
+
+/* 
+ * Arduino Uno
+ * BUSY 7 
+ * RST  8
+ * DC   9
+ * CS   10
+ * CLK  13
+ * DIN  11
+ */
+
+ /*
+  * ESP8266
+  * BUSY 2
+  * DC   15
+  * MISO 14
+  * CLK  12
+  * CS   13
+  */
+
+#define BUSY_PIN 2s
+#define RST_PIN  20
+#define CS_PIN   13
+#define DC_PIN   15
 
 unsigned char image[1024];
 Paint paint(image, 0, 0);
