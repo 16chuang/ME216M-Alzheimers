@@ -24,10 +24,10 @@
 //      WiFi      //
 //#define WIFI_SSID "Claire"
 //#define WIFI_PASS "colebluestamp"
-// #define WIFI_SSID "ME216M Wi-Fi Network" // WiFi name
-// #define WIFI_PASS "me216marduino" // WiFi password
- #define WIFI_SSID "LOFT" // WiFi name
- #define WIFI_PASS "loftloft" // WiFi password
+ #define WIFI_SSID "ME216M Wi-Fi Network" // WiFi name
+ #define WIFI_PASS "me216marduino" // WiFi password
+//#define WIFI_SSID "LOFT" // WiFi name
+//#define WIFI_PASS "loftloft" // WiFi password
 
 //      Adafruit IO      //
 #define IO_USERNAME "claire_h"
@@ -56,7 +56,7 @@ AdafruitIO_Feed *secondsFeed = io.feed("me216m-synapse.num-seconds");
 #define CS   15
 #define DC   2
 
-GxIO_Class display_io(SPI, CS, DC, RST); 
+GxIO_Class display_io(SPI, CS, DC, RST);
 GxEPD_Class display(display_io, RST, BUSY);
 
 
@@ -115,9 +115,9 @@ void setup() {
   Serial.begin(115200);
   EEPROM.begin(512);
 
-//  EEPROM.write(0,0);
+  //  EEPROM.write(0,0);
   gameId = EEPROM.read(0);
-  
+
   pinMode(MUX_S0, OUTPUT);
   pinMode(MUX_S1, OUTPUT);
   pinMode(MUX_S2, OUTPUT);
@@ -132,7 +132,7 @@ void setup() {
 
   // Connect to WiFi and io.adafruit.com
   io.connect();
-  while(io.status() < AIO_CONNECTED) {
+  while (io.status() < AIO_CONNECTED) {
     Serial.print(".");
     delay(500);
   }
@@ -165,7 +165,7 @@ void loop() {
     // Prepare for game
     readBoardState(originalBoard);
     copyBoard(originalBoard, prevBoard);
-    EEPROM.write(0, gameId); 
+    EEPROM.write(0, gameId);
     EEPROM.commit();
 
     // Play game
@@ -190,7 +190,7 @@ void loop() {
 //              HELPERS             //
 //////////////////////////////////////
 bool playGame() {
-//  Serial.print("match state: "); Serial.println(matchState);
+  //  Serial.print("match state: "); Serial.println(matchState);
 
   int numUnmatched = 0;
 
@@ -198,33 +198,33 @@ bool playGame() {
   for (int i = 0; i < NUM_TILES; i++) {
     // Read tile ID at current position
     currBoard[i] = tileId(readMuxChannel(tilePins[i]));
-//    Serial.print(tilePins[i]);
-//    Serial.print(" ");
-    Serial.print("p "); Serial.print(prevBoard[i]);  Serial.print(" c "); 
+    //    Serial.print(tilePins[i]);
+    //    Serial.print(" ");
+    Serial.print("p "); Serial.print(prevBoard[i]);  Serial.print(" c ");
     Serial.print(currBoard[i]);
     Serial.print(" ");
     Serial.print(readMuxChannel(tilePins[i]));
     Serial.print(" \t");
 
     if (currBoard[i] != NO_TILE) numUnmatched++;
-    
+
     // Tile hasn't changed
     if (currBoard[i] == prevBoard[i]) continue;
 
     // Tile flipped face down
-    if (prevBoard[i] == NO_TILE && currBoard[i] > NO_TILE) { 
+    if (prevBoard[i] == NO_TILE && currBoard[i] > NO_TILE) {
       reportTileFlipDown(currBoard[i]);
-      
+
       if (matchState == STATE_WAIT_FOR_2) {
         tile1 = NO_TILE;
         matchState = STATE_WAIT_FOR_1;
       }
 
-    // Tile flipped face up
+      // Tile flipped face up
     } else if (prevBoard[i] > NO_TILE && currBoard[i] == NO_TILE) {
       int tileId = originalBoard[i];
       reportTileFlipUp(tileId);
-      
+
       if (matchState == STATE_WAIT_FOR_1) {
         tile1 = tileId;
         matchState = STATE_WAIT_FOR_2;
@@ -237,7 +237,7 @@ bool playGame() {
     }
   }
   Serial.println();
-  
+
   // Prepare for next loop
   copyBoard(currBoard, prevBoard);
 
@@ -252,7 +252,7 @@ void copyBoard(int from[NUM_TILES], int to[NUM_TILES]) {
 
 void checkForTileMatch() {
   numFlips++;
-  
+
   if (tile1 == tile2) {
     score++;
     updateDisplayScore();
@@ -279,9 +279,9 @@ int tileId(int reading) {
 void readBoardState(int board[NUM_TILES]) {
   for (int i = 0; i < NUM_TILES; i++) {
     board[i] = tileId(readMuxChannel(tilePins[i]));
-//    Serial.print(board[i]); Serial.print(" ");
+    //    Serial.print(board[i]); Serial.print(" ");
   }
-//  Serial.println();
+  //  Serial.println();
 }
 
 int readMuxChannel(int chan) {
@@ -299,7 +299,7 @@ void displayLogo(bool showLoading) {
   display.fillScreen(GxEPD_WHITE);
   display.setRotation(3);
   display.drawBitmap(bitmapLogo, 25, 30, 80, 72, GxEPD_BLACK);
-  
+
   display.setTextColor(GxEPD_BLACK);
   display.setFont(&FreeSansBold18pt7b);
   display.setCursor(120, 75);
@@ -310,7 +310,7 @@ void displayLogo(bool showLoading) {
     display.setCursor(115, 120);
     display.println("Loading...");
   }
-  
+
   display.update();
 }
 
@@ -321,7 +321,7 @@ void displayStartScreen() {
 
   display.setFont(&FreeSans12pt7b);
   display.setCursor(20, 75);
-  display.println("Start 1 player game");
+  display.println("Start 1 player game?");
 
   display.update();
 }
@@ -341,7 +341,7 @@ void updateDisplayScore() {
   display.fillScreen(GxEPD_WHITE);
   display.setTextColor(GxEPD_BLACK);
   display.setRotation(3);
-  
+
   display.setFont(&FreeSans12pt7b);
   display.setCursor(30, 60);
   display.println("NUMBER OF");
